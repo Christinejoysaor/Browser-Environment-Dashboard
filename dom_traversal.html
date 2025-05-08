@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive DOM Traversal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #2c2c2c, #444);
+      color: #eee;
+      padding: 30px;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #70068b;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      margin-bottom: 30px;
+      color: #f0f0f0;
+    }
+
+    header h1 {
+      margin-bottom: 15px;
+      font-size: 24px;
+      color: #ffffff;
+    }
+
+    header p {
+      margin: 4px 0;
+      font-size: 14px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #fafaf8;
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+
+    .node {
+      padding: 20px;
+      margin: 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: transform 0.2s, box-shadow 0.2s;
+      color: #fff;
+    }
+
+    .node:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    .grandparent {
+      background: linear-gradient(135deg, #70068b);
+    }
+
+    .parent {
+      background: linear-gradient(135deg, #e9377b, #b220cf);
+      margin: 20px;
+    }
+
+    .child {
+      background: linear-gradient(135deg, #8a24ce);
+      margin-left: 20px;
+    }
+
+    .highlight {
+      outline: 4px solid #f6c90e;
+      outline-offset: 3px;
+    }
+
+    .controls {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    button {
+      padding: 12px 18px;
+      margin: 8px;
+      font-size: 14px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    button:nth-child(1) { background: #e011be; }
+    button:nth-child(2) { background: #1a40eb; }
+    button:nth-child(3) { background: #05ce52; }
+    button:nth-child(4) { background: #dfa842; color: #333; }
+    button:nth-child(5) { background: #0984e3; }
+    button:nth-child(6) { background: #d63031; }
+
+    button:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+
+<header id="profile">
+  <h1>Student Profile</h1>
+  <strong>
+    <p>Name: Christine Joy M. Saor</p>
+    <p>Sex: Female</p>
+    <p>Address: Zone 6, Gubat Lagonoy Camarines Sur</p>
+    <p>Course, Year, Section: BSIT 2B</p>
+    <p>School: Partido State University</p>
+    <p>Semester/Year: 2024-2025</p>
+    <p>Subject Code: Event Driven Programming (PF2)</p>
+    <p>Instructor: Arjay F. Abio</p>
+  </strong>
+</header>
+
+<h1>DOM Manipulation</h1>
+
+<div id="grandparent" class="node grandparent">
+  Grandparent
+  <div class="node parent">
+    Parent 1
+    <div class="node child">Child 1.1</div>
+    <div class="node child">Child 1.2</div>
+  </div>
+  <div class="node parent">
+    Parent 2
+    <div class="node child">Child 2.1</div>
+    <div class="node child">Child 2.2</div>
+  </div>
+</div>
+
+<div class="controls">
+  <button onclick="traverseDown()">Traverse Down</button>
+  <button onclick="traverseUp()">Traverse Up</button>
+  <button onclick="traverseNext()">Next Sibling</button>
+  <button onclick="traversePrevious()">Previous Sibling</button>
+  <button onclick="addChild()">Add Child</button>
+  <button onclick="deleteNode()">Delete Current</button>
+</div>
+
+<script>
+  let selectedNode = null;
+
+  document.querySelectorAll('.node').forEach(node => {
+    node.addEventListener('click', event => {
+      event.stopPropagation();
+      selectNode(node);
+    });
+  });
+
+  function selectNode(node) {
+    if (selectedNode) {
+      selectedNode.classList.remove('highlight');
+    }
+    selectedNode = node;
+    selectedNode.classList.add('highlight');
+  }
+
+  function traverseDown() {
+    if (!selectedNode) return alert("Select a node first.");
+    const child = selectedNode.querySelector('.node');
+    if (child) {
+      selectNode(child);
+    } else {
+      alert("No child element.");
+    }
+  }
+
+  function traverseUp() {
+    if (!selectedNode) return alert("Select a node first.");
+    if (selectedNode.id === "grandparent") {
+      alert("Cannot traverse up from the grandparent.");
+      return;
+    }
+    const parent = selectedNode.parentElement.closest('.node');
+    if (parent) {
+      selectNode(parent);
+    }
+  }
+
+  function traverseNext() {
+    if (!selectedNode) return alert("Select a node first.");
+    let next = selectedNode.nextElementSibling;
+    while (next && !next.classList.contains('node')) {
+      next = next.nextElementSibling;
+    }
+    if (next) {
+      selectNode(next);
+    } else {
+      alert("No next sibling.");
+    }
+  }
+
+  function traversePrevious() {
+    if (!selectedNode) return alert("Select a node first.");
+    let prev = selectedNode.previousElementSibling;
+    while (prev && !prev.classList.contains('node')) {
+      prev = prev.previousElementSibling;
+    }
+    if (prev) {
+      selectNode(prev);
+    } else {
+      alert("No previous sibling.");
+    }
+  }
+
+  function addChild() {
+    if (!selectedNode) return alert("Select a node first.");
+
+    if (selectedNode.classList.contains('grandparent')) {
+      const newParent = document.createElement('div');
+      newParent.className = 'node parent';
+      const parentCount = document.querySelectorAll('.parent').length + 1;
+      newParent.textContent = `Parent ${parentCount}`;
+
+      const child1 = createChild();
+      const child2 = createChild();
+      newParent.appendChild(child1);
+      newParent.appendChild(child2);
+
+      addNodeEvent(newParent);
+      addNodeEvent(child1);
+      addNodeEvent(child2);
+
+      selectedNode.appendChild(newParent);
+
+    } else if (selectedNode.classList.contains('parent')) {
+      const newChild = createChild();
+      addNodeEvent(newChild);
+      selectedNode.appendChild(newChild);
+
+    } else {
+      alert("Cannot add a child to a child node.");
+    }
+  }
+
+  function createChild() {
+    const newChild = document.createElement('div');
+    newChild.className = 'node child';
+    newChild.textContent = `Child ${Math.random().toFixed(3)}`;
+    return newChild;
+  }
+
+  function addNodeEvent(node) {
+    node.addEventListener('click', event => {
+      event.stopPropagation();
+      selectNode(node);
+    });
+  }
+
+  function deleteNode() {
+    if (!selectedNode) return alert("Select a node first.");
+    if (selectedNode.id === "grandparent") {
+      alert("Cannot delete the grandparent node.");
+      return;
+    }
+    const parent = selectedNode.parentElement.closest('.node');
+    if (parent) {
+      parent.removeChild(selectedNode);
+      selectedNode = null;
+    }
+  }
+</script>
+
+</body>
+</html>
